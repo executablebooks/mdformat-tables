@@ -36,8 +36,11 @@ jobs:
         python-version: ${{ matrix.python-version }}
 
     - name: Installation (deps and package)
+      # we install with flit --pth-file,
+      # so that coverage will be recorded up for the module
       run: |
-        pip install .[testing]
+        pip install flit
+        flit install --deps=none --extras=test --pth-file  
 
     - name: Run pytest
       run: |
