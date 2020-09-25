@@ -1,3 +1,3 @@
-"""mdformat plugin for rendering tables."""
+"""An mdformat plugin for rendering tables."""
 
-__version__ = "0.1.0"
+__version__ = "0.0.1"

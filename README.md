@@ -1,3 +1,3 @@
-# mdformat-tables
+# mdformat-tables [IN-DEVELOPMENT]
 
-mdformat plugin for rendering tables
+An [mdformat](https://github.com/executablebooks/mdformat) plugin for rendering tables.
