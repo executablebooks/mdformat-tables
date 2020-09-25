@@ -20,7 +20,7 @@ requires-python=">=3.6"
 requires=["mdformat~=0.3.1"]
 
 [tool.flit.metadata.requires-extra]
-testing = [
+test = [
     "pytest~=6.0",
     "coverage",
     "pytest-cov",
