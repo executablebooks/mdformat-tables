@@ -52,9 +52,28 @@ jobs:
         file: ./coverage.xml
         fail_ci_if_error: true
 
+  pre-commit-hook:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.7
+
+    - name: Installation (deps and package)
+      run: |
+        pip install pre-commit
+        pip install .
+
+    - name: run pre-commit with plugin
+      run: |
+        pre-commit run --config .pre-commit-test.yaml --all-files --verbose --show-diff-on-failure
+
   publish:
     name: Publish to PyPi
-    needs: [pre-commit, tests]
+    needs: [pre-commit, tests, pre-commit-hook]
     if: github.event_name == 'push' && startsWith(github.event.ref, 'refs/tags')
     runs-on: ubuntu-latest
     steps:
