@@ -1,10 +1,30 @@
-# mdformat-tables [IN-DEVELOPMENT]
+# mdformat-tables
 
 [![Build Status][ci-badge]][ci-link]
 [![codecov.io][cov-badge]][cov-link]
 [![PyPI version][pypi-badge]][pypi-link]
 
 An [mdformat](https://github.com/executablebooks/mdformat) plugin for rendering tables.
+
+For example, converting:
+
+```markdown
+a | b | c
+:- | -: | :-:
+1 | 2 | 3
+xxxxxx | yyyyyy | zzzzzz
+```
+
+to:
+
+```markdown
+| a      |      b |   c    |
+| :----- | -----: | :----: |
+| 1      |      2 |   3    |
+| xxxxxx | yyyyyy | zzzzzz |
+```
+
+For further examples, see tests/fixtures.md in the repository.
 
 ## Development
 
