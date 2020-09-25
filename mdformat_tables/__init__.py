@@ -1,6 +1,5 @@
 """An mdformat plugin for rendering tables."""
-from . import plugin
 
-__all__ = ("plugin",)
+from .plugin import render_token, update_mdit  # noqa: F401
 
 __version__ = "0.0.1"

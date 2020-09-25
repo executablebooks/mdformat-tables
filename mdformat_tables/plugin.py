@@ -17,8 +17,7 @@ def render_token(
     options: dict,
     env: dict,
 ) -> Optional[Tuple[str, int]]:
-    """Convert token(s) to a string, or return None if no render method
-    available.
+    """Convert token(s) to a string, or return None if no render method available.
 
     :returns: (text, index) where index is of the final "consumed" token
     """

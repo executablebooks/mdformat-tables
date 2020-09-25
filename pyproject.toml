@@ -27,7 +27,7 @@ testing = [
 ]
 
 [tool.flit.entrypoints."mdformat.parser_extension"]
-tables = "mdformat_tables:plugin"
+tables = "mdformat_tables"
 
 [tool.flit.sdist]
 include = []
