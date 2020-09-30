@@ -80,3 +80,20 @@ Nested tables in blockquotes:
 > | --- | --- |
 > | bar | baz |
 .
+
+references
+.
+| [![a][b]][c] |
+| - |
+| [![a][b]][c] |
+
+[b]: link1
+[c]: link2
+.
+| [![a][b]][c] |
+| ------------ |
+| [![a][b]][c] |
+
+[b]: link1
+[c]: link2
+.

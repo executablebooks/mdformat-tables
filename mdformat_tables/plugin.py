@@ -17,12 +17,17 @@ def _parse_cells(
     """Convert tokens in each cell to strings."""
     for i, row in enumerate(rows):
         for j, cell_tokens in enumerate(row):
-            rows[i][j] = renderer.render(
-                [Token("paragraph_open", "p", 1)] + cell_tokens
-                or [Token("text", "", 0)] + [Token("paragraph_close", "p", -1)],
-                options,
-                env,
-            ).rstrip()
+            rows[i][j] = (
+                renderer.render(
+                    [Token("paragraph_open", "p", 1)] + cell_tokens
+                    or [Token("text", "", 0)] + [Token("paragraph_close", "p", -1)],
+                    options,
+                    env,
+                    finalize=False,
+                )
+                .replace(MARKERS.BLOCK_SEPARATOR, "")
+                .rstrip()
+            )
     return rows
 
 
