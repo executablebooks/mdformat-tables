@@ -1,4 +1,0 @@
-{
-    "python.pythonPath": "/Users/chrisjsewell/opt/miniconda3/envs/test-jupyter-book/bin/python",
-    "python.formatting.provider": "black"
-}
