@@ -36,22 +36,18 @@ def _to_string(rows: List[List[str]], align: List[str], widths: dict) -> List[st
     lines.append(
         "| "
         + " | ".join(
-            [
-                f"{{:{al or '<'}{widths[i]}}}".format(text)
-                for i, (text, al) in enumerate(zip(rows[0], align[0]))
-            ]
+            f"{{:{al or '<'}{widths[i]}}}".format(text)
+            for i, (text, al) in enumerate(zip(rows[0], align[0]))
         )
         + " |"
     )
     lines.append(
         "| "
         + " | ".join(
-            [
-                (":" if al in ("<", "^") else "-")
-                + "-" * (widths[i] - 2)
-                + (":" if al in (">", "^") else "-")
-                for i, al in enumerate(align[0])
-            ]
+            (":" if al in ("<", "^") else "-")
+            + "-" * (widths[i] - 2)
+            + (":" if al in (">", "^") else "-")
+            for i, al in enumerate(align[0])
         )
         + " |"
     )
@@ -59,10 +55,8 @@ def _to_string(rows: List[List[str]], align: List[str], widths: dict) -> List[st
         lines.append(
             "| "
             + " | ".join(
-                [
-                    f"{{:{al or '<'}{widths[i]}}}".format(text)
-                    for i, (text, al) in enumerate(zip(row, als))
-                ]
+                f"{{:{al or '<'}{widths[i]}}}".format(text)
+                for i, (text, al) in enumerate(zip(row, als))
             )
             + " |"
         )
