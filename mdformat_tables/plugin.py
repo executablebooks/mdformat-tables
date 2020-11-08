@@ -12,7 +12,7 @@ def update_mdit(mdit: MarkdownIt) -> None:
 
 
 def _parse_cells(
-    rows: List[List[Token]], renderer: MDRenderer, options: dict, env: dict
+    rows: List[List[List[Token]]], renderer: MDRenderer, options: dict, env: dict
 ) -> List[List[str]]:
     """Convert tokens in each cell to strings."""
     for i, row in enumerate(rows):
