@@ -48,9 +48,9 @@ nested syntax
 - | -
 `c` | [d](link)
 .
-| *a* | [b](<link>) |
-| --- | ----------- |
-| `c` | [d](<link>) |
+| *a* | [b](link) |
+| --- | --------- |
+| `c` | [d](link) |
 .
 
 paragraph before/after
