@@ -12,7 +12,7 @@ def update_mdit(mdit: MarkdownIt) -> None:
 
 
 def _parse_cells(
-    rows: List[List[Token]], renderer: MDRenderer, options: dict, env: dict
+    rows: List[List[List[Token]]], renderer: MDRenderer, options: dict, env: dict
 ) -> List[List[str]]:
     """Convert tokens in each cell to strings."""
     for i, row in enumerate(rows):
@@ -36,22 +36,18 @@ def _to_string(rows: List[List[str]], align: List[str], widths: dict) -> List[st
     lines.append(
         "| "
         + " | ".join(
-            [
-                f"{{:{al or '<'}{widths[i]}}}".format(text)
-                for i, (text, al) in enumerate(zip(rows[0], align[0]))
-            ]
+            f"{{:{al or '<'}{widths[i]}}}".format(text)
+            for i, (text, al) in enumerate(zip(rows[0], align[0]))
         )
         + " |"
     )
     lines.append(
         "| "
         + " | ".join(
-            [
-                (":" if al in ("<", "^") else "-")
-                + "-" * (widths[i] - 2)
-                + (":" if al in (">", "^") else "-")
-                for i, al in enumerate(align[0])
-            ]
+            (":" if al in ("<", "^") else "-")
+            + "-" * (widths[i] - 2)
+            + (":" if al in (">", "^") else "-")
+            for i, al in enumerate(align[0])
         )
         + " |"
     )
@@ -59,10 +55,8 @@ def _to_string(rows: List[List[str]], align: List[str], widths: dict) -> List[st
         lines.append(
             "| "
             + " | ".join(
-                [
-                    f"{{:{al or '<'}{widths[i]}}}".format(text)
-                    for i, (text, al) in enumerate(zip(row, als))
-                ]
+                f"{{:{al or '<'}{widths[i]}}}".format(text)
+                for i, (text, al) in enumerate(zip(row, als))
             )
             + " |"
         )
