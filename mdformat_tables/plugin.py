@@ -2,8 +2,7 @@ from collections import OrderedDict
 from typing import List
 
 from markdown_it import MarkdownIt
-from markdown_it.token import Token
-from mdformat.renderer import MDRenderer
+from mdformat.renderer import TreeNode
 
 
 def update_mdit(mdit: MarkdownIt) -> None:
@@ -12,16 +11,15 @@ def update_mdit(mdit: MarkdownIt) -> None:
 
 
 def _parse_cells(
-    rows: List[List[List[Token]]], options: dict, env: dict
+    rows: List[List[TreeNode]], renderer_funcs, options: dict, env: dict
 ) -> List[List[str]]:
     """Convert tokens in each cell to strings."""
     for i, row in enumerate(rows):
-        for j, cell_tokens in enumerate(row):
-            rows[i][j] = MDRenderer().render(
-                cell_tokens,
+        for j, cell_inline_node in enumerate(row):
+            rows[i][j] = cell_inline_node.render(
+                renderer_funcs,
                 options,
                 env,
-                finalize=False,
             )
     return rows
 
@@ -69,7 +67,6 @@ def _render_table(node, renderer_funcs, options, env):
                 rows.append([])
                 align.append([])
             elif child.type_ in ("th", "td"):
-                rows[-1].append([])
                 style = child.opening.attrGet("style") or ""
                 if "text-align:right" in style:
                     align[-1].append(">")
@@ -79,15 +76,15 @@ def _render_table(node, renderer_funcs, options, env):
                     align[-1].append("^")
                 else:
                     align[-1].append("")
-                inline_token = child.children[0].token
-                rows[-1][-1].append(inline_token)
+                inline_node = child.children[0]
+                rows[-1].append(inline_node)
 
             _traverse(child)
 
     _traverse(node)
 
     # parse all cells
-    rows = _parse_cells(rows, options, env)
+    rows = _parse_cells(rows, renderer_funcs, options, env)
 
     # work out the widths for each column
     widths = OrderedDict()
