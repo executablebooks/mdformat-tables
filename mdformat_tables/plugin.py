@@ -1,8 +1,9 @@
 from collections import OrderedDict
-from typing import List
+from typing import List, Mapping
 
 from markdown_it import MarkdownIt
 from mdformat.renderer import TreeNode
+from mdformat.renderer.typing import RendererFunc
 
 
 def update_mdit(mdit: MarkdownIt) -> None:
@@ -11,7 +12,10 @@ def update_mdit(mdit: MarkdownIt) -> None:
 
 
 def _parse_cells(
-    rows: List[List[TreeNode]], renderer_funcs, options: dict, env: dict
+    rows: List[List[TreeNode]],
+    renderer_funcs: Mapping[str, RendererFunc],
+    options: dict,
+    env: dict,
 ) -> List[List[str]]:
     """Convert tokens in each cell to strings."""
     for i, row in enumerate(rows):
@@ -56,12 +60,14 @@ def _to_string(rows: List[List[str]], align: List[str], widths: dict) -> List[st
     return lines
 
 
-def _render_table(node, renderer_funcs, options, env):
+def _render_table(
+    node: TreeNode, renderer_funcs: Mapping[str, RendererFunc], options, env
+):
     # gather all cell tokens into row * column array
     rows = []
     align = []
 
-    def _traverse(node):
+    def _traverse(node: TreeNode):
         for child in node.children:
             if child.type_ == "tr":
                 rows.append([])
@@ -99,4 +105,4 @@ def _render_table(node, renderer_funcs, options, env):
     return "\n".join(lines)
 
 
-RENDERERS = {"table": _render_table}
+RENDERER_FUNCS: Mapping[str, RendererFunc] = {"table": _render_table}
