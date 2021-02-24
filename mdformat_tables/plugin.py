@@ -79,9 +79,9 @@ def render_token(  # noqa: C901
     # gather all cell tokens into row * column array
     rows = []
     align = []
-    while tokens[index].type != "table_close":
+    while True:
         index += 1
-        if index >= len(tokens):
+        if index >= len(tokens) or tokens[index].type == "table_close":
             break
         if tokens[index].type == "tr_open":
             rows.append([])
@@ -102,9 +102,9 @@ def render_token(  # noqa: C901
                 align[-1].append("")
             inline_token = tokens[index + 1]
             rows[-1][-1].append(inline_token)
-            while tokens[index].type != f"{tag}_close":
+            while True:
                 index += 1
-                if index >= len(tokens):
+                if index >= len(tokens) or tokens[index].type == f"{tag}_close":
                     break
 
     # parse all cells
