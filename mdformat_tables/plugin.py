@@ -19,8 +19,7 @@ def _parse_cells(
         for j, cell_tokens in enumerate(row):
             rows[i][j] = (
                 renderer.render(
-                    [Token("paragraph_open", "p", 1)] + cell_tokens
-                    or [Token("text", "", 0)] + [Token("paragraph_close", "p", -1)],
+                    cell_tokens,
                     options,
                     env,
                     finalize=False,
@@ -63,7 +62,7 @@ def _to_string(rows: List[List[str]], align: List[str], widths: dict) -> List[st
     return lines
 
 
-def render_token(
+def render_token(  # noqa: C901
     renderer: MDRenderer,
     tokens: List[Token],
     index: int,
@@ -80,8 +79,10 @@ def render_token(
     # gather all cell tokens into row * column array
     rows = []
     align = []
-    while index < len(tokens) and tokens[index].type != "table_close":
+    while tokens[index].type != "table_close":
         index += 1
+        if index >= len(tokens):
+            break
         if tokens[index].type == "tr_open":
             rows.append([])
             align.append([])
@@ -99,9 +100,12 @@ def render_token(
                 align[-1].append("^")
             else:
                 align[-1].append("")
-            while index < len(tokens) and tokens[index].type != f"{tag}_close":
+            inline_token = tokens[index + 1]
+            rows[-1][-1].append(inline_token)
+            while tokens[index].type != f"{tag}_close":
                 index += 1
-                rows[-1][-1].append(tokens[index])
+                if index >= len(tokens):
+                    break
 
     # parse all cells
     rows = _parse_cells(rows, renderer, options, env)
