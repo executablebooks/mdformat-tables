@@ -1,9 +1,9 @@
 from collections import OrderedDict
-from typing import List, Optional, Tuple
+from typing import List
 
 from markdown_it import MarkdownIt
 from markdown_it.token import Token
-from mdformat.renderer import MARKERS, MDRenderer
+from mdformat.renderer import MDRenderer
 
 
 def update_mdit(mdit: MarkdownIt) -> None:
@@ -12,21 +12,16 @@ def update_mdit(mdit: MarkdownIt) -> None:
 
 
 def _parse_cells(
-    rows: List[List[List[Token]]], renderer: MDRenderer, options: dict, env: dict
+    rows: List[List[List[Token]]], options: dict, env: dict
 ) -> List[List[str]]:
     """Convert tokens in each cell to strings."""
     for i, row in enumerate(rows):
         for j, cell_tokens in enumerate(row):
-            rows[i][j] = (
-                renderer.render(
-                    [Token("paragraph_open", "p", 1)] + cell_tokens
-                    or [Token("text", "", 0)] + [Token("paragraph_close", "p", -1)],
-                    options,
-                    env,
-                    finalize=False,
-                )
-                .replace(MARKERS.BLOCK_SEPARATOR, "")
-                .rstrip()
+            rows[i][j] = MDRenderer().render(
+                cell_tokens,
+                options,
+                env,
+                finalize=False,
             )
     return rows
 
@@ -63,48 +58,36 @@ def _to_string(rows: List[List[str]], align: List[str], widths: dict) -> List[st
     return lines
 
 
-def render_token(
-    renderer: MDRenderer,
-    tokens: List[Token],
-    index: int,
-    options: dict,
-    env: dict,
-) -> Optional[Tuple[str, int]]:
-    """Convert token(s) to a string, or return None if no render method available.
-
-    :returns: (text, index) where index is of the final "consumed" token
-    """
-    if tokens[index].type != "table_open":
-        return None
-
+def _render_table(node, renderer_funcs, options, env):
     # gather all cell tokens into row * column array
     rows = []
     align = []
-    while index < len(tokens) and tokens[index].type != "table_close":
-        index += 1
-        if tokens[index].type == "tr_open":
-            rows.append([])
-            align.append([])
-            continue
-        for tag in ["th", "td"]:
-            if tokens[index].type != f"{tag}_open":
-                continue
-            rows[-1].append([])
-            style = tokens[index].attrGet("style") or ""
-            if "text-align:right" in style:
-                align[-1].append(">")
-            elif "text-align:left" in style:
-                align[-1].append("<")
-            elif "text-align:center" in style:
-                align[-1].append("^")
-            else:
-                align[-1].append("")
-            while index < len(tokens) and tokens[index].type != f"{tag}_close":
-                index += 1
-                rows[-1][-1].append(tokens[index])
+
+    def _traverse(node):
+        for child in node.children:
+            if child.type_ == "tr":
+                rows.append([])
+                align.append([])
+            elif child.type_ in ("th", "td"):
+                rows[-1].append([])
+                style = child.opening.attrGet("style") or ""
+                if "text-align:right" in style:
+                    align[-1].append(">")
+                elif "text-align:left" in style:
+                    align[-1].append("<")
+                elif "text-align:center" in style:
+                    align[-1].append("^")
+                else:
+                    align[-1].append("")
+                inline_token = child.children[0].token
+                rows[-1][-1].append(inline_token)
+
+            _traverse(child)
+
+    _traverse(node)
 
     # parse all cells
-    rows = _parse_cells(rows, renderer, options, env)
+    rows = _parse_cells(rows, options, env)
 
     # work out the widths for each column
     widths = OrderedDict()
@@ -116,4 +99,7 @@ def render_token(
     # note: assuming always one header row
     lines = _to_string(rows, align, widths)
 
-    return "\n".join(lines) + MARKERS.BLOCK_SEPARATOR, index
+    return "\n".join(lines)
+
+
+RENDERERS = {"table": _render_table}
