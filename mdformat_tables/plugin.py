@@ -2,7 +2,7 @@ from collections import OrderedDict
 from typing import List, Mapping
 
 from markdown_it import MarkdownIt
-from mdformat.renderer import TreeNode
+from mdformat.renderer import SyntaxTreeNode
 from mdformat.renderer.typing import RendererFunc
 
 
@@ -12,7 +12,7 @@ def update_mdit(mdit: MarkdownIt) -> None:
 
 
 def _parse_cells(
-    rows: List[List[TreeNode]],
+    rows: List[List[SyntaxTreeNode]],
     renderer_funcs: Mapping[str, RendererFunc],
     options: dict,
     env: dict,
@@ -61,18 +61,18 @@ def _to_string(rows: List[List[str]], align: List[str], widths: dict) -> List[st
 
 
 def _render_table(
-    node: TreeNode, renderer_funcs: Mapping[str, RendererFunc], options, env
+    node: SyntaxTreeNode, renderer_funcs: Mapping[str, RendererFunc], options, env
 ):
     # gather all cell tokens into row * column array
     rows = []
     align = []
 
-    def _traverse(node: TreeNode):
+    def _traverse(node: SyntaxTreeNode):
         for child in node.children:
-            if child.type_ == "tr":
+            if child.type == "tr":
                 rows.append([])
                 align.append([])
-            elif child.type_ in ("th", "td"):
+            elif child.type in ("th", "td"):
                 style = child.opening.attrGet("style") or ""
                 if "text-align:right" in style:
                     align[-1].append(">")
