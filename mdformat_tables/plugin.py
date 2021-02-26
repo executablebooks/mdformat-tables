@@ -1,8 +1,8 @@
 from collections import OrderedDict
-from typing import List, Mapping
+from typing import Any, List, Mapping, MutableMapping
 
 from markdown_it import MarkdownIt
-from mdformat.renderer import SyntaxTreeNode
+from mdformat.renderer import RenderTreeNode
 from mdformat.renderer.typing import RendererFunc
 
 
@@ -12,10 +12,10 @@ def update_mdit(mdit: MarkdownIt) -> None:
 
 
 def _parse_cells(
-    rows: List[List[SyntaxTreeNode]],
+    rows: List[List[RenderTreeNode]],
     renderer_funcs: Mapping[str, RendererFunc],
-    options: dict,
-    env: dict,
+    options: Mapping[str, Any],
+    env: MutableMapping,
 ) -> List[List[str]]:
     """Convert tokens in each cell to strings."""
     for i, row in enumerate(rows):
@@ -28,7 +28,9 @@ def _parse_cells(
     return rows
 
 
-def _to_string(rows: List[List[str]], align: List[str], widths: dict) -> List[str]:
+def _to_string(
+    rows: List[List[str]], align: List[str], widths: Mapping[int, int]
+) -> List[str]:
     lines = []
     lines.append(
         "| "
@@ -61,19 +63,22 @@ def _to_string(rows: List[List[str]], align: List[str], widths: dict) -> List[st
 
 
 def _render_table(
-    node: SyntaxTreeNode, renderer_funcs: Mapping[str, RendererFunc], options, env
-):
+    node: RenderTreeNode,
+    renderer_funcs: Mapping[str, RendererFunc],
+    options: Mapping[str, Any],
+    env: MutableMapping,
+) -> str:
     # gather all cell tokens into row * column array
-    rows = []
-    align = []
+    rows: List[List[RenderTreeNode]] = []
+    align: List[List[str]] = []
 
-    def _traverse(node: SyntaxTreeNode):
+    def _traverse(node: RenderTreeNode) -> None:
         for child in node.children:
             if child.type == "tr":
                 rows.append([])
                 align.append([])
             elif child.type in ("th", "td"):
-                style = child.opening.attrGet("style") or ""
+                style = child.attrs.get("style") or ""
                 if "text-align:right" in style:
                     align[-1].append(">")
                 elif "text-align:left" in style:
@@ -84,7 +89,6 @@ def _render_table(
                     align[-1].append("")
                 inline_node = child.children[0]
                 rows[-1].append(inline_node)
-
             _traverse(child)
 
     _traverse(node)
@@ -93,7 +97,7 @@ def _render_table(
     rows = _parse_cells(rows, renderer_funcs, options, env)
 
     # work out the widths for each column
-    widths = OrderedDict()
+    widths: MutableMapping[int, int] = OrderedDict()
     for row in rows:
         for j, cell_text in enumerate(row):
             widths[j] = max(widths.get(j, 3), len(cell_text))
