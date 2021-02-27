@@ -18,18 +18,11 @@ def _parse_cells(
     env: MutableMapping,
 ) -> List[List[str]]:
     """Convert tokens in each cell to strings."""
-    for i, row in enumerate(rows):
-        for j, cell_inline_node in enumerate(row):
-            rows[i][j] = cell_inline_node.render(
-                renderer_funcs,
-                options,
-                env,
-            )
-    return rows
+    return [[cell.render(renderer_funcs, options, env) for cell in row] for row in rows]
 
 
 def _to_string(
-    rows: List[List[str]], align: List[str], widths: Mapping[int, int]
+    rows: List[List[str]], align: List[List[str]], widths: Mapping[int, int]
 ) -> List[str]:
     lines = []
     lines.append(
@@ -94,17 +87,17 @@ def _render_table(
     _traverse(node)
 
     # parse all cells
-    rows = _parse_cells(rows, renderer_funcs, options, env)
+    parsed_rows = _parse_cells(rows, renderer_funcs, options, env)
 
     # work out the widths for each column
     widths: MutableMapping[int, int] = OrderedDict()
-    for row in rows:
+    for row in parsed_rows:
         for j, cell_text in enumerate(row):
             widths[j] = max(widths.get(j, 3), len(cell_text))
 
     # write content
     # note: assuming always one header row
-    lines = _to_string(rows, align, widths)
+    lines = _to_string(parsed_rows, align, widths)
 
     return "\n".join(lines)
 
