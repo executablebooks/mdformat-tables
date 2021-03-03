@@ -17,7 +17,7 @@ def _parse_cells(
     options: Mapping[str, Any],
     env: MutableMapping,
 ) -> List[List[str]]:
-    """Convert tokens in each cell to strings."""
+    """Convert nodes in each cell to strings."""
     return [[cell.render(renderer_funcs, options, env) for cell in row] for row in rows]
 
 
@@ -61,11 +61,14 @@ def _render_table(
     options: Mapping[str, Any],
     env: MutableMapping,
 ) -> str:
-    # gather all cell tokens into row * column array
+    """Render a `RenderTreeNode` of type "table"."""
+    # gather all cell nodes into row * column array
     rows: List[List[RenderTreeNode]] = []
     align: List[List[str]] = []
 
-    def _traverse(node: RenderTreeNode) -> None:
+    def _gather_cell_nodes(node: RenderTreeNode) -> None:
+        """Recursively gather cell nodes and alignment to `rows` and
+        `align`."""
         for child in node.children:
             if child.type == "tr":
                 rows.append([])
@@ -82,9 +85,9 @@ def _render_table(
                     align[-1].append("")
                 inline_node = child.children[0]
                 rows[-1].append(inline_node)
-            _traverse(child)
+            _gather_cell_nodes(child)
 
-    _traverse(node)
+    _gather_cell_nodes(node)
 
     # parse all cells
     parsed_rows = _parse_cells(rows, renderer_funcs, options, env)
