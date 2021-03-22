@@ -6,6 +6,6 @@ repos:
       entry: mdformat
       files: "tests/pre-commit-test.md"
       types: [markdown]
-      language: system
+      language: python
       additional_dependencies:
         - mdformat-tables
