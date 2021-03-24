@@ -1,0 +1,90 @@
+[
+  {
+    "markdown": "| foo | bar |\n| --- | --- |\n| baz | bim |\n",
+    "html": "<table>\n<thead>\n<tr>\n<th>foo</th>\n<th>bar</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td>baz</td>\n<td>bim</td>\n</tr>\n</tbody>\n</table>\n",
+    "example": 198,
+    "start_line": 3329,
+    "end_line": 3348,
+    "section": "Tables (extension)",
+    "extensions": [
+      "table"
+    ]
+  },
+  {
+    "markdown": "| abc | defghi |\n:-: | -----------:\nbar | baz\n",
+    "html": "<table>\n<thead>\n<tr>\n<th align=\"center\">abc</th>\n<th align=\"right\">defghi</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td align=\"center\">bar</td>\n<td align=\"right\">baz</td>\n</tr>\n</tbody>\n</table>\n",
+    "example": 199,
+    "start_line": 3353,
+    "end_line": 3372,
+    "section": "Tables (extension)",
+    "extensions": [
+      "table"
+    ]
+  },
+  {
+    "markdown": "| f\\|oo  |\n| ------ |\n| b `\\|` az |\n| b **\\|** im |\n",
+    "html": "<table>\n<thead>\n<tr>\n<th>f|oo</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td>b <code>|</code> az</td>\n</tr>\n<tr>\n<td>b <strong>|</strong> im</td>\n</tr>\n</tbody>\n</table>\n",
+    "example": 200,
+    "start_line": 3377,
+    "end_line": 3398,
+    "section": "Tables (extension)",
+    "extensions": [
+      "table"
+    ]
+  },
+  {
+    "markdown": "| abc | def |\n| --- | --- |\n| bar | baz |\n> bar\n",
+    "html": "<table>\n<thead>\n<tr>\n<th>abc</th>\n<th>def</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td>bar</td>\n<td>baz</td>\n</tr>\n</tbody>\n</table>\n<blockquote>\n<p>bar</p>\n</blockquote>\n",
+    "example": 201,
+    "start_line": 3403,
+    "end_line": 3426,
+    "section": "Tables (extension)",
+    "extensions": [
+      "table"
+    ]
+  },
+  {
+    "markdown": "| abc | def |\n| --- | --- |\n| bar | baz |\nbar\n\nbar\n",
+    "html": "<table>\n<thead>\n<tr>\n<th>abc</th>\n<th>def</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td>bar</td>\n<td>baz</td>\n</tr>\n<tr>\n<td>bar</td>\n<td></td>\n</tr>\n</tbody>\n</table>\n<p>bar</p>\n",
+    "example": 202,
+    "start_line": 3428,
+    "end_line": 3455,
+    "section": "Tables (extension)",
+    "extensions": [
+      "table"
+    ]
+  },
+  {
+    "markdown": "| abc | def |\n| --- |\n| bar |\n",
+    "html": "<p>| abc | def |\n| --- |\n| bar |</p>\n",
+    "example": 203,
+    "start_line": 3460,
+    "end_line": 3468,
+    "section": "Tables (extension)",
+    "extensions": [
+      "table"
+    ]
+  },
+  {
+    "markdown": "| abc | def |\n| --- | --- |\n| bar |\n| bar | baz | boo |\n",
+    "html": "<table>\n<thead>\n<tr>\n<th>abc</th>\n<th>def</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td>bar</td>\n<td></td>\n</tr>\n<tr>\n<td>bar</td>\n<td>baz</td>\n</tr>\n</tbody>\n</table>\n",
+    "example": 204,
+    "start_line": 3474,
+    "end_line": 3498,
+    "section": "Tables (extension)",
+    "extensions": [
+      "table"
+    ]
+  },
+  {
+    "markdown": "| abc | def |\n| --- | --- |\n",
+    "html": "<table>\n<thead>\n<tr>\n<th>abc</th>\n<th>def</th>\n</tr>\n</thead>\n</table>\n",
+    "example": 205,
+    "start_line": 3502,
+    "end_line": 3514,
+    "section": "Tables (extension)",
+    "extensions": [
+      "table"
+    ]
+  }
+]
