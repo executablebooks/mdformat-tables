@@ -1,11 +1,12 @@
+# A pre-commit hook for testing unreleased changes.
+# This is a system hook that will NOT be given a virtual environment.
+# Thus you will need to `pip install .` before running.
 repos:
   - repo: local
     hooks:
     - id: mdformat
-      name: mdformat
+      name: mdformat-no-venv
       entry: mdformat
       files: "tests/pre-commit-test.md"
       types: [markdown]
       language: system
-      additional_dependencies:
-        - mdformat-tables

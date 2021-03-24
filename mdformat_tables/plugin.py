@@ -1,9 +1,9 @@
 from collections import OrderedDict
-from typing import List, Optional, Tuple
+from typing import Any, List, Mapping, MutableMapping
 
 from markdown_it import MarkdownIt
-from markdown_it.token import Token
-from mdformat.renderer import MARKERS, MDRenderer
+from mdformat.renderer import RenderTreeNode
+from mdformat.renderer.typing import RendererFunc
 
 
 def update_mdit(mdit: MarkdownIt) -> None:
@@ -12,26 +12,18 @@ def update_mdit(mdit: MarkdownIt) -> None:
 
 
 def _parse_cells(
-    rows: List[List[List[Token]]], renderer: MDRenderer, options: dict, env: dict
+    rows: List[List[RenderTreeNode]],
+    renderer_funcs: Mapping[str, RendererFunc],
+    options: Mapping[str, Any],
+    env: MutableMapping,
 ) -> List[List[str]]:
-    """Convert tokens in each cell to strings."""
-    for i, row in enumerate(rows):
-        for j, cell_tokens in enumerate(row):
-            rows[i][j] = (
-                renderer.render(
-                    [Token("paragraph_open", "p", 1)] + cell_tokens
-                    or [Token("text", "", 0)] + [Token("paragraph_close", "p", -1)],
-                    options,
-                    env,
-                    finalize=False,
-                )
-                .replace(MARKERS.BLOCK_SEPARATOR, "")
-                .rstrip()
-            )
-    return rows
+    """Convert nodes in each cell to strings."""
+    return [[cell.render(renderer_funcs, options, env) for cell in row] for row in rows]
 
 
-def _to_string(rows: List[List[str]], align: List[str], widths: dict) -> List[str]:
+def _to_string(
+    rows: List[List[str]], align: List[List[str]], widths: Mapping[int, int]
+) -> List[str]:
     lines = []
     lines.append(
         "| "
@@ -63,57 +55,54 @@ def _to_string(rows: List[List[str]], align: List[str], widths: dict) -> List[st
     return lines
 
 
-def render_token(
-    renderer: MDRenderer,
-    tokens: List[Token],
-    index: int,
-    options: dict,
-    env: dict,
-) -> Optional[Tuple[str, int]]:
-    """Convert token(s) to a string, or return None if no render method available.
+def _render_table(
+    node: RenderTreeNode,
+    renderer_funcs: Mapping[str, RendererFunc],
+    options: Mapping[str, Any],
+    env: MutableMapping,
+) -> str:
+    """Render a `RenderTreeNode` of type "table"."""
+    # gather all cell nodes into row * column array
+    rows: List[List[RenderTreeNode]] = []
+    align: List[List[str]] = []
 
-    :returns: (text, index) where index is of the final "consumed" token
-    """
-    if tokens[index].type != "table_open":
-        return None
+    def _gather_cell_nodes(node: RenderTreeNode) -> None:
+        """Recursively gather cell nodes and alignment to `rows` and
+        `align`."""
+        for child in node.children:
+            if child.type == "tr":
+                rows.append([])
+                align.append([])
+            elif child.type in ("th", "td"):
+                style = child.attrs.get("style") or ""
+                if "text-align:right" in style:
+                    align[-1].append(">")
+                elif "text-align:left" in style:
+                    align[-1].append("<")
+                elif "text-align:center" in style:
+                    align[-1].append("^")
+                else:
+                    align[-1].append("")
+                inline_node = child.children[0]
+                rows[-1].append(inline_node)
+            _gather_cell_nodes(child)
 
-    # gather all cell tokens into row * column array
-    rows = []
-    align = []
-    while index < len(tokens) and tokens[index].type != "table_close":
-        index += 1
-        if tokens[index].type == "tr_open":
-            rows.append([])
-            align.append([])
-            continue
-        for tag in ["th", "td"]:
-            if tokens[index].type != f"{tag}_open":
-                continue
-            rows[-1].append([])
-            style = tokens[index].attrGet("style") or ""
-            if "text-align:right" in style:
-                align[-1].append(">")
-            elif "text-align:left" in style:
-                align[-1].append("<")
-            elif "text-align:center" in style:
-                align[-1].append("^")
-            else:
-                align[-1].append("")
-            while index < len(tokens) and tokens[index].type != f"{tag}_close":
-                index += 1
-                rows[-1][-1].append(tokens[index])
+    _gather_cell_nodes(node)
 
     # parse all cells
-    rows = _parse_cells(rows, renderer, options, env)
+    parsed_rows = _parse_cells(rows, renderer_funcs, options, env)
 
     # work out the widths for each column
-    widths = OrderedDict()
-    for row in rows:
+    widths: MutableMapping[int, int] = OrderedDict()
+    for row in parsed_rows:
         for j, cell_text in enumerate(row):
             widths[j] = max(widths.get(j, 3), len(cell_text))
 
     # write content
     # note: assuming always one header row
-    lines = _to_string(rows, align, widths)
+    lines = _to_string(parsed_rows, align, widths)
 
-    return "\n".join(lines) + MARKERS.BLOCK_SEPARATOR, index
+    return "\n".join(lines)
+
+
+RENDERER_FUNCS: Mapping[str, RendererFunc] = {"table": _render_table}
