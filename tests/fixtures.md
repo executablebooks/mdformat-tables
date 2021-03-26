@@ -53,11 +53,23 @@ nested syntax
 | `c` | [d](link) |
 .
 
+A list takes precedence in case of ambiguity
+.
+a | b
+- | -
+1 | 2
+.
+a | b
+
+- | -
+  1 | 2
+.
+
 paragraph before/after
 .
 x
 a | bb
-- | -
+-- | -
 1 | 2
 y
 .
@@ -66,8 +78,7 @@ x
 | a   | bb  |
 | --- | --- |
 | 1   | 2   |
-
-y
+| y   |     |
 .
 
 Nested tables in blockquotes:

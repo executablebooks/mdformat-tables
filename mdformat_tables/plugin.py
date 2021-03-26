@@ -87,6 +87,12 @@ def _render_table(node: RenderTreeNode, context: RenderContext) -> str:
     return "\n".join(lines)
 
 
+def _render_cell(node: RenderTreeNode, context: RenderContext) -> str:
+    inline_node = node.children[0]
+    text = inline_node.render(context)
+    return text.replace("|", "\\|")
+
+
 def _escape_tables(text: str, node: RenderTreeNode, context: RenderContext) -> str:
     # Escape the first "-" character of a line if every character on that line
     # is one of {" ", "|", "-"}. Lines like this could otherwise be parsed
@@ -97,5 +103,5 @@ def _escape_tables(text: str, node: RenderTreeNode, context: RenderContext) -> s
     )
 
 
-RENDERERS: Mapping[str, Render] = {"table": _render_table}
+RENDERERS: Mapping[str, Render] = {"table": _render_table, "td": _render_cell, "th": _render_cell}
 POSTPROCESSORS: Mapping[str, Postprocess] = {"paragraph": _escape_tables}
