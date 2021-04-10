@@ -97,3 +97,30 @@ references
 [b]: link1
 [c]: link2
 .
+
+Escaped table 1
+.
+| a |
+\| - |
+.
+| a |
+| \- |
+.
+
+Escaped table 2
+.
+a
+-\:
+.
+a
+\-:
+.
+
+Escaped table 3
+.
+a
+:\-
+.
+a
+:\-
+.
