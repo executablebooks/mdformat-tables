@@ -1,7 +1,7 @@
 simple
 .
 a | bb
-- | -
+| - | -
 1 | 2
 .
 | a   | bb  |
@@ -45,7 +45,7 @@ xxxxxx | yyyyyy | zzzzzz
 nested syntax
 .
 *a* | [b](link)
-- | -
+| - | -
 `c` | [d](link)
 .
 | *a* | [b](link) |
