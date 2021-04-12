@@ -108,4 +108,4 @@ def _escape_tables(text: str, node: RenderTreeNode, context: RenderContext) -> s
 
 
 RENDERERS: Mapping[str, Render] = {"table": _render_table}
-POSTPROCESSORS: Mapping[str, Postprocess] = {"text": _escape_tables}
+POSTPROCESSORS: Mapping[str, Postprocess] = {"paragraph": _escape_tables}
