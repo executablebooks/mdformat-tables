@@ -17,7 +17,7 @@ classifiers = [
 keywords = "mdformat,markdown,markdown-it"
 
 requires-python=">=3.6"
-requires=["mdformat>=0.6.0,<0.7.0"]
+requires=["mdformat>=0.7.1,<0.8.0"]
 
 [tool.flit.metadata.requires-extra]
 test = [

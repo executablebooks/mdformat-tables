@@ -1,9 +1,9 @@
 from collections import OrderedDict
-from typing import Any, List, Mapping, MutableMapping
+from typing import List, Mapping, MutableMapping
 
 from markdown_it import MarkdownIt
-from mdformat.renderer import RenderTreeNode
-from mdformat.renderer.typing import RendererFunc
+from mdformat.renderer import RenderContext, RenderTreeNode
+from mdformat.renderer.typing import Postprocess, Render
 
 
 def update_mdit(mdit: MarkdownIt) -> None:
@@ -12,13 +12,10 @@ def update_mdit(mdit: MarkdownIt) -> None:
 
 
 def _parse_cells(
-    rows: List[List[RenderTreeNode]],
-    renderer_funcs: Mapping[str, RendererFunc],
-    options: Mapping[str, Any],
-    env: MutableMapping,
+    rows: List[List[RenderTreeNode]], context: RenderContext
 ) -> List[List[str]]:
     """Convert nodes in each cell to strings."""
-    return [[cell.render(renderer_funcs, options, env) for cell in row] for row in rows]
+    return [[cell.render(context) for cell in row] for row in rows]
 
 
 def _to_string(
@@ -55,12 +52,7 @@ def _to_string(
     return lines
 
 
-def _render_table(
-    node: RenderTreeNode,
-    renderer_funcs: Mapping[str, RendererFunc],
-    options: Mapping[str, Any],
-    env: MutableMapping,
-) -> str:
+def _render_table(node: RenderTreeNode, context: RenderContext) -> str:
     """Render a `RenderTreeNode` of type "table"."""
     # gather all cell nodes into row * column array
     rows: List[List[RenderTreeNode]] = []
@@ -90,7 +82,7 @@ def _render_table(
     _gather_cell_nodes(node)
 
     # parse all cells
-    parsed_rows = _parse_cells(rows, renderer_funcs, options, env)
+    parsed_rows = _parse_cells(rows, context)
 
     # work out the widths for each column
     widths: MutableMapping[int, int] = OrderedDict()
@@ -105,4 +97,15 @@ def _render_table(
     return "\n".join(lines)
 
 
-RENDERER_FUNCS: Mapping[str, RendererFunc] = {"table": _render_table}
+def _escape_tables(text: str, node: RenderTreeNode, context: RenderContext) -> str:
+    # Escape the first "-" character of a line if every character on that line
+    # is one of {" ", "|", "-"}. Lines like this could otherwise be parsed
+    # as a delimiter row of a table.
+    return "\n".join(
+        line.replace("-", "\\-", 1) if all(c in "|-: " for c in line) else line
+        for line in text.split("\n")
+    )
+
+
+RENDERERS: Mapping[str, Render] = {"table": _render_table}
+POSTPROCESSORS: Mapping[str, Postprocess] = {"text": _escape_tables}
