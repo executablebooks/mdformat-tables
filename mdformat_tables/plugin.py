@@ -11,13 +11,6 @@ def update_mdit(mdit: MarkdownIt) -> None:
     mdit.enable("table")
 
 
-def _parse_cells(
-    rows: List[List[RenderTreeNode]], context: RenderContext
-) -> List[List[str]]:
-    """Convert nodes in each cell to strings."""
-    return [[cell.render(context) for cell in row] for row in rows]
-
-
 def _to_string(
     rows: List[List[str]], align: List[List[str]], widths: Mapping[int, int]
 ) -> List[str]:
@@ -54,12 +47,12 @@ def _to_string(
 
 def _render_table(node: RenderTreeNode, context: RenderContext) -> str:
     """Render a `RenderTreeNode` of type "table"."""
-    # gather all cell nodes into row * column array
-    rows: List[List[RenderTreeNode]] = []
+    # gather rendered cell content into row * column array
+    rows: List[List[str]] = []
     align: List[List[str]] = []
 
-    def _gather_cell_nodes(node: RenderTreeNode) -> None:
-        """Recursively gather cell nodes and alignment to `rows` and
+    def _gather_cells(node: RenderTreeNode) -> None:
+        """Recursively gather cell content and alignment to `rows` and
         `align`."""
         for child in node.children:
             if child.type == "tr":
@@ -76,23 +69,20 @@ def _render_table(node: RenderTreeNode, context: RenderContext) -> str:
                 else:
                     align[-1].append("")
                 inline_node = child.children[0]
-                rows[-1].append(inline_node)
-            _gather_cell_nodes(child)
+                rows[-1].append(inline_node.render(context))
+            _gather_cells(child)
 
-    _gather_cell_nodes(node)
-
-    # parse all cells
-    parsed_rows = _parse_cells(rows, context)
+    _gather_cells(node)
 
     # work out the widths for each column
     widths: MutableMapping[int, int] = OrderedDict()
-    for row in parsed_rows:
+    for row in rows:
         for j, cell_text in enumerate(row):
             widths[j] = max(widths.get(j, 3), len(cell_text))
 
     # write content
     # note: assuming always one header row
-    lines = _to_string(parsed_rows, align, widths)
+    lines = _to_string(rows, align, widths)
 
     return "\n".join(lines)
 
