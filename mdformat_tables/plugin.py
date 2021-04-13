@@ -68,8 +68,7 @@ def _render_table(node: RenderTreeNode, context: RenderContext) -> str:
                     align[-1].append("^")
                 else:
                     align[-1].append("")
-                inline_node = child.children[0]
-                rows[-1].append(inline_node.render(context))
+                rows[-1].append(child.render(context))
             _gather_cells(child)
 
     _gather_cells(node)
@@ -103,5 +102,9 @@ def _escape_tables(text: str, node: RenderTreeNode, context: RenderContext) -> s
     )
 
 
-RENDERERS: Mapping[str, Render] = {"table": _render_table, "td": _render_cell, "th": _render_cell}
+RENDERERS: Mapping[str, Render] = {
+    "table": _render_table,
+    "td": _render_cell,
+    "th": _render_cell,
+}
 POSTPROCESSORS: Mapping[str, Postprocess] = {"paragraph": _escape_tables}
