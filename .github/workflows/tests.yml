@@ -41,6 +41,8 @@ jobs:
       run: |
         pip install flit
         flit install --deps=production --extras=test --pth-file
+        # TODO: remove when released on PyPI
+        pip uninstall -y mdformat && pip install git+https://github.com/executablebooks/mdformat
 
     - name: Run pytest
       run: |

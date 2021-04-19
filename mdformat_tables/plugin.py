@@ -2,7 +2,7 @@ from collections import OrderedDict
 from typing import List, Mapping, MutableMapping
 
 from markdown_it import MarkdownIt
-from mdformat.renderer import RenderContext, RenderTreeNode
+from mdformat.renderer import WRAP_POINT, RenderContext, RenderTreeNode
 from mdformat.renderer.typing import Postprocess, Render
 
 
@@ -69,7 +69,9 @@ def _render_table(node: RenderTreeNode, context: RenderContext) -> str:
                 else:
                     align[-1].append("")
                 inline_node = child.children[0]
-                rows[-1].append(inline_node.render(context))
+                rendered_cell = inline_node.render(context)
+                rendered_cell = rendered_cell.replace(WRAP_POINT, " ")
+                rows[-1].append(rendered_cell)
             _gather_cells(child)
 
     _gather_cells(node)

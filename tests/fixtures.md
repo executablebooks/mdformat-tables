@@ -124,3 +124,26 @@ a
 a
 :\-
 .
+
+Table with inline code and emphasis
+.
+| *`operation-name`*  | *`operation-object`*  | *`input name`*      | *`processing call`*                                             |
+| ------------------- | --------------------- | ------------------- | --------------------------------------------------------------- |
+| `attestation`       | `Attestation`         | `attestation`       | `process_attestation(state, attestation)`                       |
+| `attester_slashing` | `AttesterSlashing`    | `attester_slashing` | `process_attester_slashing(state, attester_slashing)`           |
+| `block_header`      | `BeaconBlock`         | **`block`**         | `process_block_header(state, block)`                            |
+| `deposit`           | `Deposit`             | `deposit`           | `process_deposit(state, deposit)`                               |
+| `proposer_slashing` | `ProposerSlashing`    | `proposer_slashing` | `process_proposer_slashing(state, proposer_slashing)`           |
+| `voluntary_exit`    | `SignedVoluntaryExit` | `voluntary_exit`    | `process_voluntary_exit(state, voluntary_exit)`                 |
+| `sync_aggregate`    | `SyncAggregate`       | `sync_aggregate`    | `process_sync_committee(state, sync_aggregate)` (new in Altair) |
+.
+| *`operation-name`*  | *`operation-object`*  | *`input name`*      | *`processing call`*                                             |
+| ------------------- | --------------------- | ------------------- | --------------------------------------------------------------- |
+| `attestation`       | `Attestation`         | `attestation`       | `process_attestation(state, attestation)`                       |
+| `attester_slashing` | `AttesterSlashing`    | `attester_slashing` | `process_attester_slashing(state, attester_slashing)`           |
+| `block_header`      | `BeaconBlock`         | **`block`**         | `process_block_header(state, block)`                            |
+| `deposit`           | `Deposit`             | `deposit`           | `process_deposit(state, deposit)`                               |
+| `proposer_slashing` | `ProposerSlashing`    | `proposer_slashing` | `process_proposer_slashing(state, proposer_slashing)`           |
+| `voluntary_exit`    | `SignedVoluntaryExit` | `voluntary_exit`    | `process_voluntary_exit(state, voluntary_exit)`                 |
+| `sync_aggregate`    | `SyncAggregate`       | `sync_aggregate`    | `process_sync_committee(state, sync_aggregate)` (new in Altair) |
+.
