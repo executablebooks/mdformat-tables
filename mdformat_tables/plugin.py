@@ -1,5 +1,4 @@
-from collections import OrderedDict
-from typing import List, Mapping, MutableMapping
+from typing import List, Mapping
 
 from markdown_it import MarkdownIt
 from mdformat.renderer import RenderContext, RenderTreeNode
@@ -12,7 +11,7 @@ def update_mdit(mdit: MarkdownIt) -> None:
 
 
 def _to_string(
-    rows: List[List[str]], align: List[List[str]], widths: Mapping[int, int]
+    rows: List[List[str]], align: List[List[str]], widths: List[int]
 ) -> List[str]:
     lines = []
     lines.append(
@@ -56,6 +55,7 @@ def _render_table(node: RenderTreeNode, context: RenderContext) -> str:
             align.append([])
         elif descendant.type in ("th", "td"):
             style = descendant.attrs.get("style") or ""
+            assert isinstance(style, str)
             if "text-align:right" in style:
                 align[-1].append(">")
             elif "text-align:left" in style:
@@ -67,10 +67,10 @@ def _render_table(node: RenderTreeNode, context: RenderContext) -> str:
             rows[-1].append(descendant.render(context))
 
     # work out the widths for each column
-    widths: MutableMapping[int, int] = OrderedDict()
+    widths = [3] * len(rows[0])
     for row in rows:
         for j, cell_text in enumerate(row):
-            widths[j] = max(widths.get(j, 3), len(cell_text))
+            widths[j] = max(widths[j], len(cell_text))
 
     # write content
     # note: assuming always one header row
