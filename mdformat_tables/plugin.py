@@ -50,28 +50,21 @@ def _render_table(node: RenderTreeNode, context: RenderContext) -> str:
     # gather rendered cell content into row * column array
     rows: List[List[str]] = []
     align: List[List[str]] = []
-
-    def _gather_cells(node: RenderTreeNode) -> None:
-        """Recursively gather cell content and alignment to `rows` and
-        `align`."""
-        for child in node.children:
-            if child.type == "tr":
-                rows.append([])
-                align.append([])
-            elif child.type in ("th", "td"):
-                style = child.attrs.get("style") or ""
-                if "text-align:right" in style:
-                    align[-1].append(">")
-                elif "text-align:left" in style:
-                    align[-1].append("<")
-                elif "text-align:center" in style:
-                    align[-1].append("^")
-                else:
-                    align[-1].append("")
-                rows[-1].append(child.render(context))
-            _gather_cells(child)
-
-    _gather_cells(node)
+    for descendant in node.walk(include_self=False):
+        if descendant.type == "tr":
+            rows.append([])
+            align.append([])
+        elif descendant.type in ("th", "td"):
+            style = descendant.attrs.get("style") or ""
+            if "text-align:right" in style:
+                align[-1].append(">")
+            elif "text-align:left" in style:
+                align[-1].append("<")
+            elif "text-align:center" in style:
+                align[-1].append("^")
+            else:
+                align[-1].append("")
+            rows[-1].append(descendant.render(context))
 
     # work out the widths for each column
     widths: MutableMapping[int, int] = OrderedDict()
