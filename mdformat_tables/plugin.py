@@ -1,4 +1,4 @@
-from typing import List, Mapping
+from typing import List, Mapping, Sequence
 
 from markdown_it import MarkdownIt
 from mdformat.renderer import RenderContext, RenderTreeNode
@@ -11,7 +11,7 @@ def update_mdit(mdit: MarkdownIt) -> None:
 
 
 def _to_string(
-    rows: List[List[str]], align: List[List[str]], widths: List[int]
+    rows: Sequence[Sequence[str]], align: Sequence[Sequence[str]], widths: Sequence[int]
 ) -> List[str]:
     lines = []
     lines.append(
