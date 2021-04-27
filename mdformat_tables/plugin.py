@@ -68,8 +68,7 @@ def _render_table(node: RenderTreeNode, context: RenderContext) -> str:
 
     # work out the widths for each column
     widths = [
-        max(3, *(len(rows[row_idx][col_idx]) for row_idx in range(len(rows))))
-        for col_idx in range(len(rows[0]))
+        max(3, *(len(row[col_idx]) for row in rows)) for col_idx in range(len(rows[0]))
     ]
 
     # write content
