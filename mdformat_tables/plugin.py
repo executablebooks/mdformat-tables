@@ -67,10 +67,10 @@ def _render_table(node: RenderTreeNode, context: RenderContext) -> str:
             rows[-1].append(descendant.render(context))
 
     # work out the widths for each column
-    widths = [3] * len(rows[0])
-    for row in rows:
-        for j, cell_text in enumerate(row):
-            widths[j] = max(widths[j], len(cell_text))
+    widths = [
+        max(3, *(len(rows[row_idx][col_idx]) for row_idx in range(len(rows))))
+        for col_idx in range(len(rows[0]))
+    ]
 
     # write content
     # note: assuming always one header row
