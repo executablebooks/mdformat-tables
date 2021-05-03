@@ -1,7 +1,7 @@
 simple
 .
 a | bb
-- | -
+| - | -
 1 | 2
 .
 | a   | bb  |
@@ -45,7 +45,7 @@ xxxxxx | yyyyyy | zzzzzz
 nested syntax
 .
 *a* | [b](link)
-- | -
+| - | -
 `c` | [d](link)
 .
 | *a* | [b](link) |
@@ -53,11 +53,23 @@ nested syntax
 | `c` | [d](link) |
 .
 
+A list takes precedence in case of ambiguity
+.
+a | b
+- | -
+1 | 2
+.
+a | b
+
+- | \-
+  1 | 2
+.
+
 paragraph before/after
 .
 x
 a | bb
-- | -
+-- | -
 1 | 2
 y
 .
@@ -66,8 +78,7 @@ x
 | a   | bb  |
 | --- | --- |
 | 1   | 2   |
-
-y
+| y   |     |
 .
 
 Nested tables in blockquotes:

@@ -1,5 +1,4 @@
-from collections import OrderedDict
-from typing import List, Mapping, MutableMapping
+from typing import List, Mapping, Sequence
 
 from markdown_it import MarkdownIt
 from mdformat.renderer import RenderContext, RenderTreeNode
@@ -12,7 +11,7 @@ def update_mdit(mdit: MarkdownIt) -> None:
 
 
 def _to_string(
-    rows: List[List[str]], align: List[List[str]], widths: Mapping[int, int]
+    rows: Sequence[Sequence[str]], align: Sequence[Sequence[str]], widths: Sequence[int]
 ) -> List[str]:
     lines = []
     lines.append(
@@ -50,41 +49,39 @@ def _render_table(node: RenderTreeNode, context: RenderContext) -> str:
     # gather rendered cell content into row * column array
     rows: List[List[str]] = []
     align: List[List[str]] = []
-
-    def _gather_cells(node: RenderTreeNode) -> None:
-        """Recursively gather cell content and alignment to `rows` and
-        `align`."""
-        for child in node.children:
-            if child.type == "tr":
-                rows.append([])
-                align.append([])
-            elif child.type in ("th", "td"):
-                style = child.attrs.get("style") or ""
-                if "text-align:right" in style:
-                    align[-1].append(">")
-                elif "text-align:left" in style:
-                    align[-1].append("<")
-                elif "text-align:center" in style:
-                    align[-1].append("^")
-                else:
-                    align[-1].append("")
-                inline_node = child.children[0]
-                rows[-1].append(inline_node.render(context))
-            _gather_cells(child)
-
-    _gather_cells(node)
+    for descendant in node.walk(include_self=False):
+        if descendant.type == "tr":
+            rows.append([])
+            align.append([])
+        elif descendant.type in ("th", "td"):
+            style = descendant.attrs.get("style") or ""
+            assert isinstance(style, str)
+            if "text-align:right" in style:
+                align[-1].append(">")
+            elif "text-align:left" in style:
+                align[-1].append("<")
+            elif "text-align:center" in style:
+                align[-1].append("^")
+            else:
+                align[-1].append("")
+            rows[-1].append(descendant.render(context))
 
     # work out the widths for each column
-    widths: MutableMapping[int, int] = OrderedDict()
-    for row in rows:
-        for j, cell_text in enumerate(row):
-            widths[j] = max(widths.get(j, 3), len(cell_text))
+    widths = [
+        max(3, *(len(row[col_idx]) for row in rows)) for col_idx in range(len(rows[0]))
+    ]
 
     # write content
     # note: assuming always one header row
     lines = _to_string(rows, align, widths)
 
     return "\n".join(lines)
+
+
+def _render_cell(node: RenderTreeNode, context: RenderContext) -> str:
+    inline_node = node.children[0]
+    text = inline_node.render(context)
+    return text.replace("|", "\\|")
 
 
 def _escape_tables(text: str, node: RenderTreeNode, context: RenderContext) -> str:
@@ -97,5 +94,9 @@ def _escape_tables(text: str, node: RenderTreeNode, context: RenderContext) -> s
     )
 
 
-RENDERERS: Mapping[str, Render] = {"table": _render_table}
+RENDERERS: Mapping[str, Render] = {
+    "table": _render_table,
+    "td": _render_cell,
+    "th": _render_cell,
+}
 POSTPROCESSORS: Mapping[str, Postprocess] = {"paragraph": _escape_tables}
