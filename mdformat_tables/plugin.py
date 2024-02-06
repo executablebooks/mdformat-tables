@@ -42,7 +42,7 @@ def _to_string(
         "| "
         + " | ".join(
             (":" if al in ("<", "^") else "-")
-            + "-" * (widths[i] - 2)
+            + "-" * max(widths[i] - 2, 0)
             + (":" if al in (">", "^") else "-")
             for i, al in enumerate(align[0])
         )
