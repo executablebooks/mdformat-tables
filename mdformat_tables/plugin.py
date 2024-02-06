@@ -1,5 +1,6 @@
 import argparse
-from typing import List, Mapping, Sequence
+from itertools import starmap
+from typing import Iterable, List, Mapping, Sequence, Union
 
 from markdown_it import MarkdownIt
 from mdformat.renderer import RenderContext, RenderTreeNode
@@ -29,35 +30,29 @@ def update_mdit(mdit: MarkdownIt) -> None:
 def _to_string(
     rows: Sequence[Sequence[str]], align: Sequence[Sequence[str]], widths: Sequence[int]
 ) -> List[str]:
-    lines = []
-    lines.append(
-        "| "
-        + " | ".join(
+    def format_row(items: Union[Iterable[str], Sequence[str]]) -> str:
+        return "| " + " | ".join(items) + " |"
+
+    def format_delimeter_row(index: int, align: str) -> str:
+        left = ":" if align in ("<", "^") else "-"
+        middle = "-" * max(widths[index] - 2, 0)
+        right = ":" if align in (">", "^") else "-"
+        delim = left + middle + right
+        return ":-:" if delim == "::" else delim
+
+    header = format_row(
+        f"{{:{al or '<'}{widths[i]}}}".format(text)
+        for i, (text, al) in enumerate(zip(rows[0], align[0]))
+    )
+    delimiter = format_row(starmap(format_delimeter_row, enumerate(align[0])))
+    rows = [
+        format_row(
             f"{{:{al or '<'}{widths[i]}}}".format(text)
-            for i, (text, al) in enumerate(zip(rows[0], align[0]))
+            for i, (text, al) in enumerate(zip(row, als))
         )
-        + " |"
-    )
-    lines.append(
-        "| "
-        + " | ".join(
-            (":" if al in ("<", "^") else "-")
-            + "-" * max(widths[i] - 2, 0)
-            + (":" if al in (">", "^") else "-")
-            for i, al in enumerate(align[0])
-        )
-        + " |"
-    )
-    for row, als in zip(rows[1:], align[1:]):
-        lines.append(
-            "| "
-            + " | ".join(
-                f"{{:{al or '<'}{widths[i]}}}".format(text)
-                for i, (text, al) in enumerate(zip(row, als))
-            )
-            + " |"
-        )
-    return lines
+        for row, als in zip(rows[1:], align[1:])
+    ]
+    return [header, delimiter, *rows]
 
 
 def _render_table(node: RenderTreeNode, context: RenderContext) -> str:
