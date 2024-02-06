@@ -1,13 +1,29 @@
+import argparse
 from typing import List, Mapping, Sequence
 
 from markdown_it import MarkdownIt
 from mdformat.renderer import RenderContext, RenderTreeNode
 from mdformat.renderer.typing import Postprocess, Render
 
+_COMPACT_TABLES = False
+"""user-specified flag for toggling compact tables."""
+
+
+def add_cli_options(parser: argparse.ArgumentParser) -> None:
+    """Add options to the mdformat CLI, to be stored in `mdit.options["mdformat"]`."""
+    parser.add_argument(
+        "--compact-tables",
+        action="store_true",
+        help="If specified, do not add padding to table cells.",
+    )
+
 
 def update_mdit(mdit: MarkdownIt) -> None:
     """Update the parser, e.g. by adding a plugin: `mdit.use(myplugin)`"""
     mdit.enable("table")
+
+    global _COMPACT_TABLES
+    _COMPACT_TABLES = mdit.options["mdformat"].get("compact_tables", False)
 
 
 def _to_string(
@@ -66,10 +82,13 @@ def _render_table(node: RenderTreeNode, context: RenderContext) -> str:
                 align[-1].append("")
             rows[-1].append(descendant.render(context))
 
-    # work out the widths for each column
-    widths = [
-        max(3, *(len(row[col_idx]) for row in rows)) for col_idx in range(len(rows[0]))
-    ]
+    def _calculate_width(col_idx: int) -> int:
+        """Work out the widths for each column."""
+        if _COMPACT_TABLES:
+            return 0
+        return max(3, *(len(row[col_idx]) for row in rows))
+
+    widths = [_calculate_width(col_idx) for col_idx in range(len(rows[0]))]
 
     # write content
     # note: assuming always one header row
