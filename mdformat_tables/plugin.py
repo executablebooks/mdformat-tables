@@ -49,11 +49,12 @@ def _to_string(
     def join_row(items: Union[Iterable[str], Sequence[str]]) -> str:
         return "| " + " | ".join(items) + " |"
 
-    def format_delimeter_row(index: int, align: str) -> str:
-        left = ":" if align in ("<", "^") else "-"
-        middle = "-" * max(0, widths[index] - 2)
-        right = ":" if align in (">", "^") else "-"
-        delim = left + middle + right
+    def format_delimiter_cell(index: int, align: str) -> str:
+        delim = (
+            (":" if align in ("<", "^") else "-")
+            + ("-" * max(0, widths[index] - 2))
+            + (":" if align in (">", "^") else "-")
+        )
         return ":-:" if delim == "::" else delim
 
     pad = {"": _rpad, "<": _rpad, ">": _lpad, "^": _center}
@@ -61,7 +62,7 @@ def _to_string(
     header = join_row(
         pad[al](text, widths[i]) for i, (text, al) in enumerate(zip(rows[0], align[0]))
     )
-    delimiter = join_row((format_delimeter_row(i, al) for i, al in enumerate(align[0])))
+    delimiter = join_row((format_delimiter_cell(i, al) for i, al in enumerate(align[0])))
     rows = [
         join_row(pad[al](text, widths[i]) for i, (text, al) in enumerate(zip(row, als)))
         for row, als in zip(rows[1:], align[1:])
