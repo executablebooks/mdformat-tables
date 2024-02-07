@@ -1,5 +1,4 @@
 import argparse
-from itertools import starmap
 from typing import Iterable, List, Mapping, Sequence, Union
 
 from markdown_it import MarkdownIt
@@ -30,23 +29,23 @@ def update_mdit(mdit: MarkdownIt) -> None:
 def _to_string(
     rows: Sequence[Sequence[str]], align: Sequence[Sequence[str]], widths: Sequence[int]
 ) -> List[str]:
-    def format_row(items: Union[Iterable[str], Sequence[str]]) -> str:
+    def join_row(items: Union[Iterable[str], Sequence[str]]) -> str:
         return "| " + " | ".join(items) + " |"
 
     def format_delimeter_row(index: int, align: str) -> str:
         left = ":" if align in ("<", "^") else "-"
-        middle = "-" * max(widths[index] - 2, 0)
+        middle = "-" * max(0, widths[index] - 2)
         right = ":" if align in (">", "^") else "-"
         delim = left + middle + right
         return ":-:" if delim == "::" else delim
 
-    header = format_row(
+    header = join_row(
         f"{{:{al or '<'}{widths[i]}}}".format(text)
         for i, (text, al) in enumerate(zip(rows[0], align[0]))
     )
-    delimiter = format_row(starmap(format_delimeter_row, enumerate(align[0])))
+    delimiter = join_row((format_delimeter_row(i, al) for i, al in enumerate(align[0])))
     rows = [
-        format_row(
+        join_row(
             f"{{:{al or '<'}{widths[i]}}}".format(text)
             for i, (text, al) in enumerate(zip(row, als))
         )
