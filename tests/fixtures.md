@@ -135,3 +135,14 @@ a
 a
 :\-
 .
+
+Expanded Unicode (https://github.com/executablebooks/mdformat-tables/issues/16)
+.
+| 模型 | 时间        |
+|-------|------|
+| BBFN   | 2021-07     |
+.
+| 模型 | 时间    |
+| ---- | ------- |
+| BBFN | 2021-07 |
+.
