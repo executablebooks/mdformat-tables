@@ -19,6 +19,10 @@ def add_cli_options(parser: argparse.ArgumentParser) -> None:
     )
 
 
+_COMPACT_TABLES = False
+"""user-specified flag for toggling compact tables."""
+
+
 def update_mdit(mdit: MarkdownIt) -> None:
     """Update the parser, e.g. by adding a plugin: `mdit.use(myplugin)`"""
     mdit.enable("table")
@@ -62,7 +66,9 @@ def _to_string(
     header = join_row(
         pad[al](text, widths[i]) for i, (text, al) in enumerate(zip(rows[0], align[0]))
     )
-    delimiter = join_row((format_delimiter_cell(i, al) for i, al in enumerate(align[0])))
+    delimiter = join_row(
+        (format_delimiter_cell(i, al) for i, al in enumerate(align[0]))
+    )
     rows = [
         join_row(pad[al](text, widths[i]) for i, (text, al) in enumerate(zip(row, als)))
         for row, als in zip(rows[1:], align[1:])
