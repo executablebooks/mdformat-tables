@@ -10,3 +10,10 @@ repos:
       files: "tests/pre-commit-test.md"
       types: [markdown]
       language: system
+    - id: mdformat-compact
+      name: mdformat-no-venv
+      entry: mdformat
+      args: ["--compact-tables"]
+      files: "tests/pre-commit-test-compact.md"
+      types: [markdown]
+      language: system

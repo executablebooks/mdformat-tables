@@ -1,47 +1,60 @@
-from typing import List, Mapping, Sequence
+import argparse
+from typing import Iterable, List, Mapping, Sequence, Union
 
 from markdown_it import MarkdownIt
 from mdformat.renderer import RenderContext, RenderTreeNode
 from mdformat.renderer.typing import Postprocess, Render
+
+_COMPACT_TABLES = False
+"""user-specified flag for toggling compact tables."""
+
+
+def add_cli_options(parser: argparse.ArgumentParser) -> None:
+    """Add options to the mdformat CLI, to be stored in `mdit.options["mdformat"]`."""
+    parser.add_argument(
+        "--compact-tables",
+        action="store_true",
+        help="If specified, do not add padding to table cells.",
+    )
 
 
 def update_mdit(mdit: MarkdownIt) -> None:
     """Update the parser, e.g. by adding a plugin: `mdit.use(myplugin)`"""
     mdit.enable("table")
 
+    global _COMPACT_TABLES
+    _COMPACT_TABLES = mdit.options["mdformat"].get("compact_tables", False)
+
 
 def _to_string(
     rows: Sequence[Sequence[str]], align: Sequence[Sequence[str]], widths: Sequence[int]
 ) -> List[str]:
-    lines = []
-    lines.append(
-        "| "
-        + " | ".join(
+    def join_row(items: Union[Iterable[str], Sequence[str]]) -> str:
+        return "| " + " | ".join(items) + " |"
+
+    def format_delimiter_cell(index: int, align: str) -> str:
+        delim = (
+            (":" if align in ("<", "^") else "-")
+            + ("-" * max(0, widths[index] - 2))
+            + (":" if align in (">", "^") else "-")
+        )
+        return ":-:" if delim == "::" else delim
+
+    header = join_row(
+        f"{{:{al or '<'}{widths[i]}}}".format(text)
+        for i, (text, al) in enumerate(zip(rows[0], align[0]))
+    )
+    delimiter = join_row(
+        (format_delimiter_cell(i, al) for i, al in enumerate(align[0]))
+    )
+    rows = [
+        join_row(
             f"{{:{al or '<'}{widths[i]}}}".format(text)
-            for i, (text, al) in enumerate(zip(rows[0], align[0]))
+            for i, (text, al) in enumerate(zip(row, als))
         )
-        + " |"
-    )
-    lines.append(
-        "| "
-        + " | ".join(
-            (":" if al in ("<", "^") else "-")
-            + "-" * (widths[i] - 2)
-            + (":" if al in (">", "^") else "-")
-            for i, al in enumerate(align[0])
-        )
-        + " |"
-    )
-    for row, als in zip(rows[1:], align[1:]):
-        lines.append(
-            "| "
-            + " | ".join(
-                f"{{:{al or '<'}{widths[i]}}}".format(text)
-                for i, (text, al) in enumerate(zip(row, als))
-            )
-            + " |"
-        )
-    return lines
+        for row, als in zip(rows[1:], align[1:])
+    ]
+    return [header, delimiter, *rows]
 
 
 def _render_table(node: RenderTreeNode, context: RenderContext) -> str:
@@ -66,10 +79,13 @@ def _render_table(node: RenderTreeNode, context: RenderContext) -> str:
                 align[-1].append("")
             rows[-1].append(descendant.render(context))
 
-    # work out the widths for each column
-    widths = [
-        max(3, *(len(row[col_idx]) for row in rows)) for col_idx in range(len(rows[0]))
-    ]
+    def _calculate_width(col_idx: int) -> int:
+        """Work out the widths for each column."""
+        if _COMPACT_TABLES:
+            return 0
+        return max(3, *(len(row[col_idx]) for row in rows))
+
+    widths = [_calculate_width(col_idx) for col_idx in range(len(rows[0]))]
 
     # write content
     # note: assuming always one header row
