@@ -44,7 +44,9 @@ def _to_string(
         f"{{:{al or '<'}{widths[i]}}}".format(text)
         for i, (text, al) in enumerate(zip(rows[0], align[0]))
     )
-    delimiter = join_row((format_delimiter_cell(i, al) for i, al in enumerate(align[0])))
+    delimiter = join_row(
+        (format_delimiter_cell(i, al) for i, al in enumerate(align[0]))
+    )
     rows = [
         join_row(
             f"{{:{al or '<'}{widths[i]}}}".format(text)
