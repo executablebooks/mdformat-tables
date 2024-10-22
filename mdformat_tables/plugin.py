@@ -70,6 +70,7 @@ def _to_string(
 
 def _render_table(node: RenderTreeNode, context: RenderContext) -> str:
     """Render a `RenderTreeNode` of type "table"."""
+    compact_tables = context.options["mdformat"].get("compact_tables", False)
     # gather rendered cell content into row * column array
     rows: List[List[str]] = []
     align: List[List[str]] = []
@@ -92,7 +93,7 @@ def _render_table(node: RenderTreeNode, context: RenderContext) -> str:
 
     def _calculate_width(col_idx: int) -> int:
         """Work out the widths for each column."""
-        if context.options["mdformat"].get("compact_tables", False):
+        if compact_tables:
             return 0
         return max(3, *(wcswidth(row[col_idx]) for row in rows))
 
