@@ -7,9 +7,10 @@ from mdformat.renderer.typing import Postprocess, Render
 from wcwidth import wcswidth
 
 
-def add_cli_options(parser: argparse.ArgumentParser) -> None:
-    """Add options to the mdformat CLI, to be stored in `mdit.options["mdformat"]`."""
-    parser.add_argument(
+def add_cli_argument_group(group: argparse._ArgumentGroup) -> None:
+    """Add options to the mdformat CLI, to be stored in
+    `mdit.options["mdformat"]["plugin"]["tables"]`."""
+    group.add_argument(
         "--compact-tables",
         action="store_true",
         help="If specified, do not add padding to table cells.",
@@ -70,7 +71,14 @@ def _to_string(
 
 def _render_table(node: RenderTreeNode, context: RenderContext) -> str:
     """Render a `RenderTreeNode` of type "table"."""
-    compact_tables = context.options["mdformat"].get("compact_tables", False)
+    compact_tables_from_cli_or_toml = (
+        context.options["mdformat"]
+        .get("plugin", {})
+        .get("tables", {})
+        .get("compact_tables")
+    )
+    compact_tables_from_api = context.options["mdformat"].get("compact_tables")
+    compact_tables = compact_tables_from_cli_or_toml or compact_tables_from_api
     # gather rendered cell content into row * column array
     rows: List[List[str]] = []
     align: List[List[str]] = []
