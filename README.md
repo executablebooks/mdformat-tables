@@ -45,7 +45,7 @@ tox
 To run the code formatting and style checks:
 
 ```bash
-tox -e py37-pre-commit
+tox -e py311-pre-commit
 ```
 
 or directly
@@ -58,7 +58,7 @@ pre-commit run --all
 To run the pre-commit hook test:
 
 ```bash
-tox -e py37-hook
+tox -e py311-hook
 ```
 
 ## Publish to PyPi
