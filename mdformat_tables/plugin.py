@@ -6,9 +6,6 @@ from mdformat.renderer import RenderContext, RenderTreeNode
 from mdformat.renderer.typing import Postprocess, Render
 from wcwidth import wcswidth
 
-_COMPACT_TABLES = False
-"""user-specified flag for toggling compact tables."""
-
 
 def add_cli_options(parser: argparse.ArgumentParser) -> None:
     """Add options to the mdformat CLI, to be stored in `mdit.options["mdformat"]`."""
@@ -22,9 +19,6 @@ def add_cli_options(parser: argparse.ArgumentParser) -> None:
 def update_mdit(mdit: MarkdownIt) -> None:
     """Update the parser, e.g. by adding a plugin: `mdit.use(myplugin)`"""
     mdit.enable("table")
-
-    global _COMPACT_TABLES
-    _COMPACT_TABLES = mdit.options["mdformat"].get("compact_tables", False)
 
 
 def _lpad(text: str, width: int) -> str:
@@ -76,6 +70,7 @@ def _to_string(
 
 def _render_table(node: RenderTreeNode, context: RenderContext) -> str:
     """Render a `RenderTreeNode` of type "table"."""
+    compact_tables = context.options["mdformat"].get("compact_tables", False)
     # gather rendered cell content into row * column array
     rows: List[List[str]] = []
     align: List[List[str]] = []
@@ -98,7 +93,7 @@ def _render_table(node: RenderTreeNode, context: RenderContext) -> str:
 
     def _calculate_width(col_idx: int) -> int:
         """Work out the widths for each column."""
-        if _COMPACT_TABLES:
+        if compact_tables:
             return 0
         return max(3, *(wcswidth(row[col_idx]) for row in rows))
 
